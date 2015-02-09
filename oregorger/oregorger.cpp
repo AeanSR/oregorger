@@ -134,8 +134,6 @@ void refresh1();
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
-	PAINTSTRUCT ps;
-	HDC hdc;
 
 	switch (message)
 	{
@@ -156,35 +154,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_PAINT:
-		Graphics *myGraphics;
-
-		Pen *myPen;
-		Brush* myBrush;
-
-		hdc = BeginPaint(hWnd, &ps);
-
-		myGraphics = new Graphics(hdc);
-
-		myPen = new Pen(Color(255, 0, 0, 0), 1);
-		myBrush = new SolidBrush(Color(255, 0, 0, 0));
-
-		for (int i = 0; i < 360; i += 40)
-
-			myGraphics->DrawLine(myPen, 20, 60 + i, 340, 60 + i);
-
-		for (int i = 0; i < 360; i += 40)
-
-			myGraphics->DrawLine(myPen, 20 + i, 60, 20 + i, 380);
-		for (int i = 0; i < 9; i++) for (int j = 0; j < 9; j++){
-			if (!roadmap[i][j]){
-				myGraphics->FillRectangle(myBrush, Rect(20 + j * 40, 60 + i * 40, 40, 40));
-			}
-		}
-		delete myGraphics;
-
-		delete myPen;
-
-		EndPaint(hWnd, &ps);
 		refresh1();
 		break;
 	case WM_DESTROY:
@@ -237,10 +206,33 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void refresh1(){
 	static HDC hdc = GetDC(ghwnd);
-	static Graphics *myGraphics = new ::Graphics(hdc);
+	static HDC mdc = CreateCompatibleDC(hdc);
+	static HBITMAP mmap = CreateCompatibleBitmap(hdc, 440, 480);
+	SelectObject(mdc, mmap);
+	static Graphics *myGraphics = new ::Graphics(mdc);
 	static Brush *myPen1 = new Gdiplus::SolidBrush(Color(255, 255, 0, 0));
 	static Brush *myPen2 = new Gdiplus::SolidBrush(Color(255, 0, 0, 255));
 	static Brush *myPen3 = new Gdiplus::SolidBrush(Color(255, 255, 255, 0));
+	static Brush *myPen4 = new Gdiplus::SolidBrush(Color(255, 255, 255, 255));
+	myGraphics->FillRectangle(myPen4, Rect(0,0,440,480));
+		Pen *myPen;
+		Brush* myBrush;
+
+		myPen = new Pen(Color(255, 0, 0, 0), 1);
+		myBrush = new SolidBrush(Color(255, 0, 0, 0));
+
+		for (int i = 0; i < 360; i += 40)
+
+			myGraphics->DrawLine(myPen, 20, 60 + i, 340, 60 + i);
+
+		for (int i = 0; i < 360; i += 40)
+
+			myGraphics->DrawLine(myPen, 20 + i, 60, 20 + i, 380);
+		for (int i = 0; i < 9; i++) for (int j = 0; j < 9; j++){
+			if (!roadmap[i][j]){
+				myGraphics->FillRectangle(myBrush, Rect(20 + j * 40, 60 + i * 40, 40, 40));
+			}
+		}
 
 	myGraphics->FillRectangle(myPen3, Rect(20 + boxy * 40, 60 + boxx * 40, 40, 40));
 	myGraphics->FillEllipse(myPen2, Rect(20 + chary * 40, 60 + charx * 40, 40, 40));
@@ -258,6 +250,9 @@ void refresh1(){
 	// Draw string to screen.
 	myGraphics->DrawString(drawString, -1, drawFont, drawPoint, drawBrush);
 
+	RECT rect;
+	GetClientRect(ghwnd, &rect);
+	BitBlt(hdc, rect.left, rect.top, 440, 480, mdc, 0, 0, SRCCOPY);
 }
 
 void refresh(){
@@ -266,22 +261,7 @@ void refresh(){
 }
 
 void startcallback(){
-	static HDC hdc = GetDC(ghwnd);
-	static Graphics *myGraphics = new ::Graphics(hdc);
-	std::chrono::milliseconds dur(1000);
-	WCHAR three[] = L"3";
-	WCHAR two[] = L"2";
-	WCHAR one[] = L"1";
-	static Font* drawFont = new Font(L"Tahoma", 36);
-	static SolidBrush* drawBrush = new SolidBrush(Color::YellowGreen);
-	PointF drawPoint = PointF(180.0F, 0.0F);
-	myGraphics->DrawString(three, -1, drawFont, drawPoint, drawBrush);
-	std::this_thread::sleep_for(dur); 
-	refresh();
-	myGraphics->DrawString(two, -1, drawFont, drawPoint, drawBrush);
-	std::this_thread::sleep_for(dur); 
-	refresh();
-	myGraphics->DrawString(one, -1, drawFont, drawPoint, drawBrush);
+	std::chrono::milliseconds dur(2000);
 	std::this_thread::sleep_for(dur); 
 	refresh();
 }
