@@ -37,6 +37,7 @@ void init(){
 	fine = 1;
 	rolling = 0;
 	score = 0;
+	scoredelta = 0;
 	bossx = 3;
 	bossy = 2;
 	charx = 3;
