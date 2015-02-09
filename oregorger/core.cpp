@@ -48,7 +48,7 @@ void init(){
 }
 
 void wait(int t){
-    std::chrono::milliseconds dur(speed);
+    std::chrono::milliseconds dur(t);
     std::this_thread::sleep_for(dur); 
 }
 
